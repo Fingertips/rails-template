@@ -274,7 +274,7 @@ inside 'app/concerns' do
     
     def parent_resource_params
       @parent_resource_params ||=
-        if key = params.keys.find { |k| k =~ /^(\w+)_id$/ }
+        if key = params.keys.find { |k| k =~ /^(\\w+)_id$/ }
           { :param => key, :id => params[key], :name => $1, :class_name => $1.classify, :class => $1.classify.constantize }
         else
           {}
@@ -303,6 +303,9 @@ class NestedResourceTestController
   def params=(params)
     @params = params.with_indifferent_access
   end
+end
+
++lass CamelCaseTest
 end
 
 describe "NestedResourceMethods, at the class level" do
@@ -340,9 +343,9 @@ describe "NestedResourceMethods" do
     controller.parent_resource_params.should == { :name => 'member', :class => Member, :param => 'member_id', :class_name => 'Member', :id => 12 }
   end
   
-  xit "should know the parent resource params for camelcased classes" do
-    controller.params = { :camel_case_id => 12, :id => 34 }
-    controller.parent_resource_params.should == { :name => 'camel_case', :class => CamelCase, :param => 'camel_case_id', :class_name => 'CamelCase', :id => 12 }
+  it "should know the parent resource params for camelcased classes" do
+    controller.params = { :camel_case_test_id => 12, :id => 34 }
+    controller.parent_resource_params.should == { :name => 'camel_case_test', :class => CamelCaseTest, :param => 'camel_case_test_id', :class_name => 'CamelCaseTest', :id => 12 }
   end
   
   it "should have cached the parent_resource_params" do
@@ -402,8 +405,13 @@ inside 'app/models/member' do
 %{require 'digest/sha1'
 
 class Member
-  attr_reader :password
+  attr_accessible :password, :verify_password
   
+  def generate_reset_password_token!
+    update_attribute :reset_password_token, Token.generate
+  end
+  
+  attr_reader :password
   def password=(password)
     self.hashed_password = self.class.hash_password(password)
   end
@@ -427,6 +435,16 @@ class Member
       member
     end
   end
+  
+  private
+  
+  def password_is_not_blank
+    if hashed_password == self.class.hash_password('')
+      errors.add(:password, "can't be blank")
+    end
+  end
+  
+  validate :password_is_not_blank
 end}
 end
 
@@ -459,7 +477,17 @@ end
 
 describe "A member, concerning authentication" do
   before do
-    @member = Member.new
+    @member = members(:adrian)
+  end
+  
+  it "should require a password" do
+    @member.password = ''
+    @member.should.not.be.valid
+    @member.errors.on(:password).should.not.be.blank
+    
+    @member.hashed_password = Member.hash_password('')
+    @member.should.not.be.valid
+    @member.errors.on(:password).should.not.be.blank
   end
   
   it "should automatically hash passwords" do
@@ -472,6 +500,27 @@ describe "A member, concerning authentication" do
   
   it "should respond to password" do
     @member.should.respond_to(:password)
+  end
+  
+  it "should generate a new reset password token" do
+    token = Token.generate
+    Token.stubs(:generate).returns(token)
+    
+    @member.generate_reset_password_token!
+    @member.reload.reset_password_token.should == token
+  end
+  
+  %w{ hashed_password role reset_password_token }.each do |attribute|
+    it "should not allow access to `\#{attribute}'" do
+      before = @member.send(attribute)
+      @member.update_attributes(attribute => '[updated]')
+      @member.reload.send(attribute).should == before
+    end
+  end
+  
+  it "should allow access to password and verify password" do
+    @member.update_attributes(:password => 'new', :verify_password => 'new')
+    @member.reload.hashed_password.should == Member.hash_password('new')
   end
 end}
 end
@@ -1001,5 +1050,4 @@ end}
 rake 'db:create:all'
 rake 'db:migrate'
 
-puts '[!] Running tests...', ''
-exec 'rake test'
+exec 'rake test' if yes?('Would you like to run the test suite? [Y/n]')
