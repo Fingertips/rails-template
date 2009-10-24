@@ -15,6 +15,20 @@ class Rails::TemplateRunner
   end
 end
 
+def test_cache(dir)
+  if ENV['TEST_TEMPLATE'] && File.exist?(File.join('../vendor_cache', dir))
+    puts "[!] Using #{dir} cache..."
+    FileUtils.cp_r "../vendor_cache/#{dir}", "vendor"
+  else
+    yield
+    if ENV['TEST_TEMPLATE']
+      puts "[!] Creating #{dir} cache..."
+      FileUtils.mkdir_p "../vendor_cache"
+      FileUtils.cp_r "vendor/#{dir}", "../vendor_cache"
+    end
+  end
+end
+
 ####
 #
 # Skeleton template
@@ -22,28 +36,23 @@ end
 
 # Rails
 
-if ENV['TEST_TEMPLATE'] && File.exist?('../rails')
-  puts '[!] Using rails cache...'
-  run 'cp -R ../rails vendor/'
-else
+test_cache 'rails' do
   # On 2.3.4 the git command is broken as it only executes in_root...
   inside 'vendor' do
     Git.run 'clone git://github.com/Fingertips/rails.git'
     run 'cd rails && git remote add rails git://github.com/rails/rails.git'
   end
-  if ENV['TEST_TEMPLATE']
-    puts '[!] Creating rails cache...'
-    run 'cp -R vendor/rails ../'
-  end
 end
 
 # Plugins
 
-plugin 'authentication-needed-san', :git => 'git://github.com/Fingertips/authentication-needed-san.git'
-plugin 'authorization-san',         :git => 'git://github.com/Fingertips/authorization-san.git'
-plugin 'generator-san',             :git => 'git://github.com/Fingertips/generator-san.git'
-plugin 'peiji-san',                 :git => 'git://github.com/Fingertips/peiji-san.git'
-plugin 'on-test-spec',              :git => 'git://github.com/Fingertips/on-test-spec.git'
+test_cache 'plugins' do
+  plugin 'authentication-needed-san', :git => 'git://github.com/Fingertips/authentication-needed-san.git'
+  plugin 'authorization-san',         :git => 'git://github.com/Fingertips/authorization-san.git'
+  plugin 'generator-san',             :git => 'git://github.com/Fingertips/generator-san.git'
+  plugin 'peiji-san',                 :git => 'git://github.com/Fingertips/peiji-san.git'
+  plugin 'on-test-spec',              :git => 'git://github.com/Fingertips/on-test-spec.git'
+end
 
 # Gems
 
@@ -377,6 +386,7 @@ end
 
 route 'map.resources :members'
 route 'map.resource  :session, :collection => { :clear => :get }'
+route 'map.root :controller => "members", :action => "new"'
 
 # Models
 
@@ -476,6 +486,8 @@ file 'test/fixtures/members.yml',
 # Controllers
 
 # * Application controller
+
+initializer 'mime_types.rb', %{Mime::Type.register 'image/jpeg', :jpg}
 
 file 'app/controllers/application_controller.rb',
 %{class ApplicationController < ActionController::Base

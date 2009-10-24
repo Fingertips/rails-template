@@ -1,7 +1,9 @@
 desc 'Drops the databases and removes the test app.'
 task :clean do
-  sh 'cd test_app && rake db:drop:all'
-  rm_rf 'test_app'
+  if File.exist? 'test_app'
+    sh 'cd test_app && rake db:drop:all' rescue nil
+    rm_rf 'test_app'
+  end
 end
 
 desc 'Runs the template with the proper env so that it caches the rails checkout.'
