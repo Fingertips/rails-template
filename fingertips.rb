@@ -1222,7 +1222,280 @@ describe ApplicationHelper, "concerning navigation" do
   end
 end}
 
+# * Views
+
 run 'rm public/index.html'
+
+file 'public/403.html',
+%{<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+  <title>Access forbidden (403)</title>
+  <style type="text/css">
+    body { background-color: #fff; color: #666; text-align: center; font-family: arial, sans-serif; }
+    div.dialog {
+      width: 25em;
+      padding: 0 4em;
+      margin: 4em auto 0 auto;
+      border: 1px solid #ccc;
+      border-right-color: #999;
+      border-bottom-color: #999;
+    }
+    h1 { font-size: 100%; color: #f00; line-height: 1.5em; }
+  </style>
+</head>
+
+<body>
+  <!-- This file lives in public/403.html -->
+  <div class="dialog">
+    <h1>Access forbidden.</h1>
+  </div>
+</body>
+</html>}
+
+file 'public/stylesheets/main.css', %{/* TODO: Need to add actualy default style rules. */}
+
+file 'public/javascripts/ready.js',
+%{// Let the javascript libs start their behaviour. These are all included at the
+// end of the document so the browser will first render the document before
+// requesting the javascripts.
+
+// Event.observe(document, 'dom:loaded', function() {
+// });
+
+// Event.observe(window, 'load', function() {
+// });}
+
+file 'app/views/layouts/application.html.erb',
+%{<!DOCTYPE html>
+<html>
+  <head>
+    <%= render :partial => 'layouts/head' %>
+  </head>
+  <body>
+    <div id="wrapper">
+      <div id="header">
+        <a id="logo" href="/">#{name.camelize}</a>
+        <%= render :partial => 'sessions/status' %>
+        
+        <ul id="navigation">
+          <%= nav_item 'Home', root_path, :class => 'first', :shallow => true %>
+          <%= nav_item 'Members', members_path, :class => 'last' %>
+        </ul>
+      </div>
+      
+      <div id="main">
+        <%= yield :layout %>
+      </div>
+    </div>
+    
+    <%= render :partial => 'layouts/application_javascript_includes' %>
+  </body>
+</html>}
+
+file 'app/views/layouts/_application_javascript_includes.html.erb',
+%{<%#= javascript_include_tag(%w(prototype effects controls) +
+ %w() + # add app specific libs
+ %w(ready), :cache => (Rails.env == 'production')) %>}
+
+file 'app/views/layouts/_head.html.erb',
+%{<meta charset="UTF-8">
+<title><%=h [@title, '#{name.camelize}'].compact.join(' ‹ ') %></title>
+<%= stylesheet_link_tag 'main', :media => 'screen' %>}
+
+# * * Members views
+
+file 'app/views/members/new.html.erb',
+%{<% @title = 'Sign up' %>
+
+<div>
+  <% form_for @member do |f| %>
+    <h2>Sign up</h2>
+    
+    <%= error_messages_for :member %>
+    
+    <div class="fields">
+      <div class="field">
+        <div class="label"><%= f.label :email %></div>
+        <div class="field"><%= f.text_field :email %></div>
+      </div>
+      
+      <div class="field">
+        <div class="label"><%= f.label :password %></div>
+        <div class="field"><%= f.password_field :password %></div>
+      </div>
+      
+      <div class="submit">
+        <%= f.submit 'Sign up' %>
+        <%= link_to 'Back', root_path, :class => 'cancel' %>
+      </div>
+    </div>
+  <% end %>
+</div>}
+
+file 'app/views/members/show.html.erb', %{Member show: <%= @member.email %>}
+
+file 'app/views/members/edit.html.erb',
+%{<% @title = 'Edit profile' %>
+
+<div>
+  <% form_for @member do |f| %>
+    <h2>Edit profile</h2>
+    
+    <%= error_messages_for :member %>
+    
+    <div class="fields">
+      <div class="field">
+        <div class="label"><%= f.label :email %></div>
+        <div class="field"><%= f.text_field :email %></div>
+      </div>
+      
+      <div class="submit">
+        <%= f.submit 'Update profile' %>
+        <%= link_to 'Back', root_path, :class => 'cancel' %>
+      </div>
+    </div>
+  <% end %>
+</div>}
+
+# * * Passwords views
+
+file 'app/views/passwords/new.html.erb',
+%{<% @title = 'Choose a new password' %>
+
+<div>
+  <% form_tag passwords_path do %>
+    <h2>Forgot password?</h2>
+    <p>Please enter your email address and we’ll send further instructions on how to choose a new password.</p>
+    
+    <% unless flash[:error].blank? %>
+      <div class="errorExplanation"><%= flash[:error] %></div>
+    <% end %>
+    
+    <div class="field">
+      <span class="label"><%= label_tag :email, 'Email address' %></span>
+      <%= text_field_tag :email %>
+    </div>
+    
+    <div class="submit">
+      <%= submit_tag 'Continue' %>
+      <%= link_to 'Cancel', root_path, :class => 'cancel' %>
+    </div>
+  <% end %>
+</div>}
+
+file 'app/views/passwords/sent.html.erb',
+%{<% @title = 'Choose a new password' %>
+
+<div>
+  <% form_tag root_path, :method => :get do %>
+    <h2>Forgot password?</h2>
+    <p>We’ve sent further instructions on how to choose a new password by email.</p>
+    <div>
+      <%= submit_tag 'Okay' %>
+    </div>
+  <% end %>
+</div>}
+
+file 'app/views/passwords/edit.html.erb',
+%{<div>
+  <% form_tag password_path(:id => @member.reset_password_token), :method => :put do %>
+    <h2><%= @title = 'Choose a new password' %></h2>
+    <p>You’ll be able to log in after you’ve chosen a new password.</p>
+    
+    <% if @member.errors.on(:password) %>
+      <div class="errorExplanation">The password can’t be blank.</div>
+    <% end %>
+    
+    <div>
+      <span class="label"><%= label_tag :password, 'New password' %></span>
+      <%= password_field_tag :password %>
+    </div>
+    
+    <div>
+      <%= submit_tag 'Continue' %>
+      <%= link_to 'Cancel', root_path, :class => 'cancel' %>
+    </div>
+  <% end %>
+</div>}
+
+file 'app/views/passwords/reset.html.erb',
+%{<div>
+  <% form_tag new_session_path, :method => :get do %>
+    <h2><%= @title = 'Choose a new password' %></h2>
+    <p>Your password has been changed.</p>
+    <div>
+      <%= submit_tag 'Okay' %>
+    </div>
+  <% end %>
+</div>}
+
+# * * Sessions views
+
+file 'app/views/sessions/new.html.erb',
+%{<% @title = 'Log in' %>
+
+<div>
+  <%= render :partial => 'sessions/form' %>
+</div>}
+
+file 'app/views/sessions/_form.html.erb',
+%{<% form_for(@unauthenticated || Member.new, :url => session_path) do |f| %>
+  <h2>Log in</h2>
+  
+  <% if flash[:login_error] %>
+    <div class="errorExplanation"><%= flash[:login_error] %></div>
+  <% end %>
+  
+  <div class="field">
+    <span class="label"><%= f.label :email %></span>
+    <%= f.text_field :email, :tabindex => 1 %>
+  </div>
+  
+  <div class="field">
+    <span class="label"><%= f.label :password %> <%= link_to 'forgot password?', new_password_path, :tabindex => 5 %></span>
+    <%= f.password_field :password, :tabindex => 2 %>
+  </div>
+  
+  <div class="field inline">
+    <%= check_box_tag :remember_me, 1, false, :tabindex => 3 %>
+    <%= label_tag :remember_me %>
+  </div>
+  
+  <div class="field">
+    <%= f.submit 'Log in', :tabindex => 4 %>
+    <%= link_to 'Cancel', root_path, :class => 'cancel', :tabindex => 5 %>
+  </div>
+<% end %>}
+
+file 'app/views/sessions/_status.html.erb',
+%{<p id="member">
+  <% if @authenticated %>
+    <%= nav_link_to 'Profile', @authenticated %>
+    <%= link_to 'Log out', clear_session_path %>
+  <% else %>
+    <%= nav_link_to 'Log in', new_session_path, 'class' => 'login' %>
+    <%= nav_link_to 'Sign up', new_member_path %>
+  <% end %>
+</p>}
+
+# * * Mailer views
+
+file 'app/views/mailer/reset_password_message.erb',
+%{Hi,
+
+Forgot your password? Click the following link to choose a new password:
+
+<%= @url %>
+
+Kind regards,
+#{name.camelize}}
+
+# Finalize
 
 rake 'db:create:all'
 rake 'db:migrate'
