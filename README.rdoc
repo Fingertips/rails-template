@@ -1,0 +1,3 @@
+Install with:
+
+  rails APP_NAME -m http://github.com/Fingertips/rails-template/raw/master/fingertips.rb
