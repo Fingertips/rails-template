@@ -239,8 +239,8 @@ inside 'test/lib' do
 describe "Model that includes ActiveRecord::Ext" do
   it "should have a named scope to order" do
     Member.order('email').should.equal_set Member.all
-    Member.order('email').map(&:name).should == Member.all.map(&:email).sort
-    Member.order('email', :desc).map(&:name).should == Member.all.map(&:email).sort.reverse
+    Member.order('email').map(&:email).should == Member.all.map(&:email).sort
+    Member.order('email', :desc).map(&:email).should == Member.all.map(&:email).sort.reverse
   end
   
   it "should have a named scope to limit" do
@@ -248,6 +248,36 @@ describe "Model that includes ActiveRecord::Ext" do
   end
 end}
 end
+
+file 'lib/token.rb',
+%{module Token
+  DEFAULT_LENGTH = 8
+  
+  def self.generate(requested_length=DEFAULT_LENGTH)
+    length = requested_length.odd? ? requested_length + 1 : requested_length
+    token = (1..length/2).map { |i| (1..2).map { (i.odd? ? ('a'..'z') : ('0'..'9')).to_a.rand }.join }.join
+    token[0...requested_length]
+  end
+end}
+
+file 'test/lib/token_test.rb',
+%{require File.expand_path('../../test_helper', __FILE__)
+
+describe "Token" do
+  it "should generate a token" do
+    Token.generate.should.not.be.blank
+  end
+  
+  it "should not generate the same token twice in quick succession" do
+    Token.generate.should.not == Token.generate
+  end
+  
+  it "should generate tokens of specific lengths" do
+    Token.generate(3).length.should == 3
+    Token.generate(40).length.should == 40
+    Token.generate(61).length.should == 61
+  end
+end}
 
 # Concerns
 
@@ -385,11 +415,17 @@ end
 # Application template
 #
 
+initializer 'application',
+%{SYSTEM_EMAIL_ADDRESS = '#{name.camelize} Support <support@example.com>'
+EMAIL_REGEXP         = /^([^@\\s]+)@((?:[-a-z0-9]+\\.)+[a-z]{2,})$/i}
+
 # Routes
 
-route 'map.resources :members'
-route 'map.resource  :session, :collection => { :clear => :get }'
+# For some reason these routes are generated in the reversed order...
 route 'map.root :controller => "members", :action => "new"'
+route 'map.resource  :session, :collection => { :clear => :get }'
+route 'map.resources :passwords'
+route 'map.resources :members'
 
 # Models
 
@@ -398,6 +434,45 @@ generate :model_san, 'member role:string email:string hashed_password:string res
 file 'app/models/member.rb',
 %{class Member < ActiveRecord::Base
   embrace :authentication
+  
+  attr_accessible :email
+  
+  private
+  
+  validates_uniqueness_of :email
+  validates_format_of :email, :with => EMAIL_REGEXP
+end}
+
+file 'test/unit/member_test.rb',
+%{describe Member, "concerning validations" do
+  before do
+    @member = Member.new
+  end
+  
+  it "should require an email" do
+    @member.email = ''
+    @member.should.not.be.valid
+    @member.errors.on(:email).should.not.be.blank
+  end
+  
+  it "should require a valid email" do
+    @member.email = 'invalid'
+    @member.should.not.be.valid
+    @member.errors.on(:email).should.not.be.blank
+  end
+  
+  it "should require a unique email" do
+    @member.email = members(:adrian).email
+    @member.should.not.be.valid
+    @member.errors.on(:email).should.not.be.blank
+  end
+end
+
+describe 'A', Member do
+  it "should allow access to email" do
+    members(:adrian).update_attributes(:email => 'new@example.com')
+    members(:adrian).reload.email.should == 'new@example.com'
+  end
 end}
 
 inside 'app/models/member' do
@@ -530,7 +605,35 @@ file 'test/fixtures/members.yml',
   hashed_password: <%= Member.hash_password('secret') %>
   email: adrian@example.com
   role: member
-}
+kelly:
+  hashed_password: <%= Member.hash_password('secret') %>
+  email: kelly@example.com
+  role: member}
+
+file 'app/models/mailer.rb',
+%{class Mailer < ActionMailer::Base
+  def reset_password_message(member, url)
+    recipients member.email
+    from       SYSTEM_EMAIL_ADDRESS
+    subject    "[#{name.camelize}] Confirm password reset"
+    body       :member => member, :url => url
+  end
+end}
+
+file 'test/unit/mailer_test.rb',
+%{require File.expand_path('../../test_helper', __FILE__)
+
+describe "Mailer", ActionMailer::TestCase do
+  it "should render a reset password message" do
+    member = members(:adrian)
+    member.generate_reset_password_token!
+    url = "http://test.host/password/\#{member.reset_password_token}/edit"
+    
+    email = Mailer.create_reset_password_message(member, url)
+    email.to.first.should == member.email
+    email.body.should.include url
+  end
+end}
 
 # Controllers
 
@@ -748,6 +851,8 @@ describe "On the", MembersController, "a visitor" do
     lambda {
       post :create, :member => valid_params
     }.should.differ('Member.count', +1)
+    assigns(:member).email.should == valid_params[:email]
+    assigns(:member).hashed_password.should == Member.hash_password(valid_params[:password])
     should.redirect_to root_url
     should.be.authenticated
   end
@@ -756,7 +861,7 @@ describe "On the", MembersController, "a visitor" do
     post :create, :member => valid_params.merge(:email => '')
     status.should.be :ok
     template.should.be 'members/new'
-    assert_select 'p[class=errors]'
+    assert_select 'div.errorExplanation'
     assert_select 'form'
     should.not.be.authenticated
   end
@@ -863,6 +968,7 @@ describe "On the", PasswordsController, "a visitor" do
     get :new
     status.should.be :success
     template.should.be 'passwords/new'
+    assert_select 'form'
   end
   
   it "should generate a password reset token and send it via email" do
@@ -901,13 +1007,14 @@ describe "On the", PasswordsController, "a visitor" do
     flash[:error].should.not.be.blank
   end
   
-  it "should see an edit form for her password" do
+  it "should see an edit form for his password" do
     @member.generate_reset_password_token!
     get :edit, :id => @member.reset_password_token
     
     status.should.be :success
     assigns(:member).should == @member
     template.should.be 'passwords/edit'
+    assert_select 'form'
   end
   
   it "should not see an edit form if no member is found for the given token" do
@@ -917,11 +1024,11 @@ describe "On the", PasswordsController, "a visitor" do
     assigns(:member).should.be nil
   end
   
-  it "should be able to update her password" do
+  it "should be able to update his password" do
     @member.generate_reset_password_token!
     put :update, :id => @member.reset_password_token, :password => "newpass"
     
-    Member.authenticate(:username => @member.username, :password => "newpass").should == @member
+    Member.authenticate(:email => @member.email, :password => "newpass").should == @member
     status.should.be :success
     template.should.be 'passwords/reset'
   end
@@ -935,7 +1042,7 @@ describe "On the", PasswordsController, "a visitor" do
     @member.reload.hashed_password.should == before
     status.should.be :success
     template.should.be 'passwords/edit'
-    assert_select ".errors", :text => "The password can’t be blank."
+    assert_select "div.errorExplanation", :text => "The password can’t be blank."
   end
   
   it "should not be allowed to update a password with an incorrect token" do
@@ -1001,24 +1108,23 @@ describe "On the", SessionsController, "a visitor" do
   end
   
   it "should redirect the user back to the page he originally requested" do
-    lambda {
-      post :create, :member => valid_credentials
-      should.be.authenticated
-    }.should.redirect_back_to edit_member_url(members(:adrian))
+    url = edit_member_url(members(:adrian))
+    post :create, { :member => valid_credentials }, {}, { :after_authentication => { :redirect_to => url }}
+    should.redirect_to url
   end
   
   it "should see an explanation if the password was wrong" do
     post :create, :member => valid_credentials.merge(:password => 'wrong')
     should.not.be.authenticated
     status.should.be :success
-    assert_select 'p[class=errors]'
+    assert_select 'div.errorExplanation'
   end
   
   it "should see an explanation when the email does not exist" do
     post :create, :member => valid_credentials.merge(:email => 'unknown@example.com')
     should.not.be.authenticated
     status.should.be :success
-    assert_select 'p[class=errors]'
+    assert_select 'div.errorExplanation'
   end
   
   it "should keep the url to return to if the password or email was wrong" do
@@ -1046,6 +1152,77 @@ describe "On the", SessionsController, "a member" do
     should.redirect_to root_url
   end
 end}
+
+# * Helpers
+
+file 'app/helpers/application_helper.rb',
+%{module ApplicationHelper
+def nav_link_to(label, url, options={})
+  if current_page?(url)
+    options[:class] ? options[:class] << ' current' : options[:class] = 'current'
+  end
+  link_to(label, url, options)
+end
+
+def nav_item(label, url, options={})
+  shallow = options.delete(:shallow)
+  
+  classes = (options[:class] || '').split(' ')
+  if (shallow and request.request_uri == url) or (!shallow and request.request_uri.start_with?(url))
+    classes << 'current'
+  end
+  options[:class] = classes.empty? ? nil : classes.join(' ')
+  
+  content_tag(:li, link_to(label, url), options)
+end}
+
+file 'test/unit/helpers/application_helper_test.rb',
+%{require File.expand_path('../../../test_helper', __FILE__)
+
+describe ApplicationHelper, "concerning navigation" do
+  attr_accessor :request
+  before do
+    @request    = stub(:request_uri => '/members')
+    @controller = stub(:request => @request)
+  end
+  
+  it "should generate a navigation link" do
+    assert_dom_equal('<a href="/passwords/new">Reset password</a>',    nav_link_to('Reset password', '/passwords/new'))
+    assert_dom_equal('<a href="/members" class="current">Members</a>', nav_link_to('Members', '/members'))
+  end
+  
+  it "should generate a navigation item" do
+    assert_dom_equal('<li><a href="/passwords/new">Reset password</a></li>', nav_item('Reset password', '/passwords/new'))
+  end
+  
+  it "should generate a navigation item with extra options" do
+    assert_dom_equal('<li class="first"><a href="/passwords/new">Reset password</a></li>', nav_item('Reset password', '/passwords/new', :class => 'first'))
+  end
+  
+  it "should generate a navigation item when the current page is equal to the navigation item" do
+    assert_dom_equal('<li class="current"><a href="/members">Members</a></li>', nav_item('Members', '/members'))
+  end
+  
+  it "should generate a navigation item when the current page is equal to the navigation item with extra options" do
+    assert_dom_equal('<li class="first current"><a href="/members">Members</a></li>', nav_item('Members', '/members', :class => 'first'))
+  end
+  
+  it "should generate a navigation item when the current page is more specific than the navigation item" do
+    @request = stub(:request_uri => '/members/12')
+    assert_dom_equal('<li class="current"><a href="/members">Members</a></li>', nav_item('Members', '/members'))
+  end
+  
+  it "should generate a shallow navigation item that doesn't become current when a subpage is viewed" do
+    assert_dom_equal('<li><a href="/">Home</a></li>', nav_item('Home', '/', :shallow => true))
+  end
+  
+  it "should generate a shallow navigation item that becomes current when the page it links to is viewed" do
+    @request = stub(:request_uri => '/')
+    assert_dom_equal('<li class="current"><a href="/">Home</a></li>', nav_item('Home', '/', :shallow => true))
+  end
+end}
+
+run 'rm public/index.html'
 
 rake 'db:create:all'
 rake 'db:migrate'
