@@ -335,7 +335,7 @@ class NestedResourceTestController
   end
 end
 
-+lass CamelCaseTest
+class CamelCaseTest
 end
 
 describe "NestedResourceMethods, at the class level" do
@@ -415,7 +415,7 @@ end
 # Application template
 #
 
-initializer 'application',
+initializer 'application.rb',
 %{SYSTEM_EMAIL_ADDRESS = '#{name.camelize} Support <support@example.com>'
 EMAIL_REGEXP         = /^([^@\\s]+)@((?:[-a-z0-9]+\\.)+[a-z]{2,})$/i}
 
@@ -444,7 +444,9 @@ file 'app/models/member.rb',
 end}
 
 file 'test/unit/member_test.rb',
-%{describe Member, "concerning validations" do
+%{require File.expand_path('../../test_helper', __FILE__)
+
+describe Member, "concerning validations" do
   before do
     @member = Member.new
   end
@@ -1157,23 +1159,24 @@ end}
 
 file 'app/helpers/application_helper.rb',
 %{module ApplicationHelper
-def nav_link_to(label, url, options={})
-  if current_page?(url)
-    options[:class] ? options[:class] << ' current' : options[:class] = 'current'
+  def nav_link_to(label, url, options={})
+    if current_page?(url)
+      options[:class] ? options[:class] << ' current' : options[:class] = 'current'
+    end
+    link_to(label, url, options)
   end
-  link_to(label, url, options)
-end
-
-def nav_item(label, url, options={})
-  shallow = options.delete(:shallow)
   
-  classes = (options[:class] || '').split(' ')
-  if (shallow and request.request_uri == url) or (!shallow and request.request_uri.start_with?(url))
-    classes << 'current'
+  def nav_item(label, url, options={})
+    shallow = options.delete(:shallow)
+    
+    classes = (options[:class] || '').split(' ')
+    if (shallow and request.request_uri == url) or (!shallow and request.request_uri.start_with?(url))
+      classes << 'current'
+    end
+    options[:class] = classes.empty? ? nil : classes.join(' ')
+    
+    content_tag(:li, link_to(label, url), options)
   end
-  options[:class] = classes.empty? ? nil : classes.join(' ')
-  
-  content_tag(:li, link_to(label, url), options)
 end}
 
 file 'test/unit/helpers/application_helper_test.rb',
