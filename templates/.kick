@@ -1,0 +1,22 @@
+# require 'ignore'
+# ignore(//)
+
+# App specific mappings
+process do |files|
+  test_files = files.take_and_map do |file|
+    case file
+    when %r{^app/views/mailer/\w+\.erb$}
+      'test/unit/mailer_test.rb'
+    end
+  end
+  
+  run_ruby_tests test_files
+end
+
+require 'rails'
+require 'jstest'
+
+# Update stories
+# process do |files|
+#   execute "rake stories:convert" if files.delete('design/requirements.txt')
+# end

@@ -42,6 +42,16 @@ end
 # Skeleton template
 #
 
+# Setup
+
+template_file 'config/database.yml' if yes? 'Use MySQL instead of SQLite? [Y/n]'
+run_tests = yes?('Would you like to run the test suite? [Y/n]')
+
+# Gems
+
+environment "gem 'test-spec', :version => '~> 0.10.0', :lib => 'test/spec'", :env => :test
+rake 'gems:install', :env => :test, :sudo => true
+
 # Rails
 
 test_cache 'rails' do
@@ -64,19 +74,10 @@ test_cache 'plugins' do
   plugin 'validates_email-san',       :git => 'git://github.com/Fingertips/validates_email-san.git'
 end
 
-# Gems
+# Misc
 
-environment "gem 'test-spec', :version => '~> 0.10.0', :lib => 'test/spec'", :env => :test
-rake 'gems:install', :env => :test, :sudo => true
-
-# Rake
-
+template_file '.kick'
 template_file 'Rakefile'
-
-# Database
-
-# TODO AppName
-template_file 'config/database.yml' if yes? 'Use MySQL instead of SQLite? [Y/n]'
 
 # Test
 
@@ -166,10 +167,8 @@ run 'rm public/index.html'
 template_file 'public/403.html'
 template_file 'public/stylesheets/main.css'
 template_file 'public/javascripts/ready.js'
-# TODO AppName
 template_file 'app/views/layouts/application.html.erb'
 template_file 'app/views/layouts/_application_javascript_includes.html.erb'
-# TODO AppName
 template_file 'app/views/layouts/_head.html.erb'
 
 # * * Members views
@@ -193,7 +192,6 @@ template_file 'app/views/sessions/_status.html.erb'
 
 # * * Mailer views
 
-# TODO AppName
 template_file 'app/views/mailer/reset_password_message.erb'
 
 # Finalize
@@ -201,4 +199,4 @@ template_file 'app/views/mailer/reset_password_message.erb'
 rake 'db:create:all'
 rake 'db:migrate'
 
-exec 'rake test' if yes?('Would you like to run the test suite? [Y/n]')
+exec 'rake test' if run_tests
