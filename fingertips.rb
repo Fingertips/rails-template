@@ -51,6 +51,7 @@ test_cache 'plugins' do
   plugin 'authorization-san',         :git => 'git://github.com/Fingertips/authorization-san.git'
   plugin 'generator-san',             :git => 'git://github.com/Fingertips/generator-san.git'
   plugin 'peiji-san',                 :git => 'git://github.com/Fingertips/peiji-san.git'
+  plugin 'validates_email-san'        :git => 'git://github.com/Fingertips/validates_email-san.git'
   plugin 'on-test-spec',              :git => 'git://github.com/Fingertips/on-test-spec.git'
 end
 
@@ -405,9 +406,7 @@ end}
 # Application template
 #
 
-initializer 'application.rb',
-%{SYSTEM_EMAIL_ADDRESS = '#{name.camelize} Support <support@example.com>'
-EMAIL_REGEXP         = /^([^@\\s]+)@((?:[-a-z0-9]+\\.)+[a-z]{2,})$/i}
+initializer 'application.rb', %{SYSTEM_EMAIL_ADDRESS = '#{name.camelize} Support <support@example.com>'}
 
 # Routes
 
@@ -430,7 +429,7 @@ file 'app/models/member.rb',
   private
   
   validates_uniqueness_of :email
-  validates_format_of :email, :with => EMAIL_REGEXP
+  validates_email :email
 end}
 
 file 'test/unit/member_test.rb',
