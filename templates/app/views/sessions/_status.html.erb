@@ -1,0 +1,9 @@
+<p id="member">
+  <% if @authenticated %>
+    <%= nav_link_to 'Profile', @authenticated %>
+    <%= link_to 'Log out', clear_session_path %>
+  <% else %>
+    <%= nav_link_to 'Log in', new_session_path, 'class' => 'login' %>
+    <%= nav_link_to 'Sign up', new_member_path %>
+  <% end %>
+</p>

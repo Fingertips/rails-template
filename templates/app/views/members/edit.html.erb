@@ -1,0 +1,21 @@
+<% @title = 'Edit profile' %>
+
+<div>
+  <% form_for @member do |f| %>
+    <h2>Edit profile</h2>
+    
+    <%= error_messages_for :member %>
+    
+    <div class="fields">
+      <div class="field">
+        <div class="label"><%= f.label :email %></div>
+        <div class="field"><%= f.text_field :email %></div>
+      </div>
+      
+      <div class="submit">
+        <%= f.submit 'Update profile' %>
+        <%= link_to 'Back', root_path, :class => 'cancel' %>
+      </div>
+    </div>
+  <% end %>
+</div>

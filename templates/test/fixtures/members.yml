@@ -1,0 +1,8 @@
+adrian:
+  hashed_password: <%= Member.hash_password('secret') %>
+  email: adrian@example.com
+  role: member
+kelly:
+  hashed_password: <%= Member.hash_password('secret') %>
+  email: kelly@example.com
+  role: member

@@ -1,0 +1,20 @@
+<div>
+  <% form_tag password_path(:id => @member.reset_password_token), :method => :put do %>
+    <h2><%= @title = 'Choose a new password' %></h2>
+    <p>You’ll be able to log in after you’ve chosen a new password.</p>
+    
+    <% if @member.errors.on(:password) %>
+      <div class="errorExplanation">The password can’t be blank.</div>
+    <% end %>
+    
+    <div>
+      <span class="label"><%= label_tag :password, 'New password' %></span>
+      <%= password_field_tag :password %>
+    </div>
+    
+    <div>
+      <%= submit_tag 'Continue' %>
+      <%= link_to 'Cancel', root_path, :class => 'cancel' %>
+    </div>
+  <% end %>
+</div>

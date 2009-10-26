@@ -1,0 +1,22 @@
+<% @title = 'Choose a new password' %>
+
+<div>
+  <% form_tag passwords_path do %>
+    <h2>Forgot password?</h2>
+    <p>Please enter your email address and we’ll send further instructions on how to choose a new password.</p>
+    
+    <% unless flash[:error].blank? %>
+      <div class="errorExplanation"><%= flash[:error] %></div>
+    <% end %>
+    
+    <div class="field">
+      <span class="label"><%= label_tag :email, 'Email address' %></span>
+      <%= text_field_tag :email %>
+    </div>
+    
+    <div class="submit">
+      <%= submit_tag 'Continue' %>
+      <%= link_to 'Cancel', root_path, :class => 'cancel' %>
+    </div>
+  <% end %>
+</div>

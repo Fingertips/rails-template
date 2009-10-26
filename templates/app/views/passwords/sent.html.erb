@@ -1,0 +1,11 @@
+<% @title = 'Choose a new password' %>
+
+<div>
+  <% form_tag root_path, :method => :get do %>
+    <h2>Forgot password?</h2>
+    <p>We’ve sent further instructions on how to choose a new password by email.</p>
+    <div>
+      <%= submit_tag 'Okay' %>
+    </div>
+  <% end %>
+</div>

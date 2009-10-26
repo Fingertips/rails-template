@@ -1,0 +1,27 @@
+<% form_for(@unauthenticated || Member.new, :url => session_path) do |f| %>
+  <h2>Log in</h2>
+  
+  <% if flash[:login_error] %>
+    <div class="errorExplanation"><%= flash[:login_error] %></div>
+  <% end %>
+  
+  <div class="field">
+    <span class="label"><%= f.label :email %></span>
+    <%= f.text_field :email, :tabindex => 1 %>
+  </div>
+  
+  <div class="field">
+    <span class="label"><%= f.label :password %> <%= link_to 'forgot password?', new_password_path, :tabindex => 5 %></span>
+    <%= f.password_field :password, :tabindex => 2 %>
+  </div>
+  
+  <div class="field inline">
+    <%= check_box_tag :remember_me, 1, false, :tabindex => 3 %>
+    <%= label_tag :remember_me %>
+  </div>
+  
+  <div class="field">
+    <%= f.submit 'Log in', :tabindex => 4 %>
+    <%= link_to 'Cancel', root_path, :class => 'cancel', :tabindex => 5 %>
+  </div>
+<% end %>

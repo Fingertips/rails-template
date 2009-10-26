@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <%= render :partial => 'layouts/head' %>
+  </head>
+  <body>
+    <div id="wrapper">
+      <div id="header">
+        <a id="logo" href="/">TestApp</a>
+        <%= render :partial => 'sessions/status' %>
+        
+        <ul id="navigation">
+          <%= nav_item 'Home', root_path, :class => 'first', :shallow => true %>
+          <%= nav_item 'Members', members_path, :class => 'last' %>
+        </ul>
+      </div>
+      
+      <div id="main">
+        <%= yield :layout %>
+      </div>
+    </div>
+    
+    <%= render :partial => 'layouts/application_javascript_includes' %>
+  </body>
+</html>
