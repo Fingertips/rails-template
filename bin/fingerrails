@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+if ARGV.empty?
+  puts "Usage: #{$0} /path/to/your/app [options]"
+else
+  ENV['TEMPLATE_HOME'] = File.expand_path('../../templates', __FILE__)
+  template = File.expand_path('../../fingertips.rb', __FILE__)
+  exec 'rails', '-m', template, *ARGV
+end

@@ -3,6 +3,9 @@
 
 require 'fileutils'
 
+TEMPLATE_HOME = ENV['TEMPLATE_HOME'] ||
+  'http://github.com/Fingertips/rails-template/raw/master/templates/'
+
 class Rails::TemplateRunner
   def name
     File.basename(root)
@@ -13,9 +16,8 @@ class Rails::TemplateRunner
     answer == 'y' || answer == 'yes' || answer.empty?
   end
   
-  TEMPLATE_HOME = ENV['TEST_TEMPLATE'] ? '../templates/' : 'http://github.com/Fingertips/rails-template/raw/master/templates/'
   def template_file(template)
-    contents = open(TEMPLATE_HOME + template).read
+    contents = open(File.join(TEMPLATE_HOME, template)).read
     contents.gsub!('{{app_name}}', name)
     contents.gsub!('{{AppName}}', name.camelize)
     file template, contents
