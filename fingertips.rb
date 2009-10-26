@@ -53,7 +53,7 @@ test_cache 'plugins' do
   plugin 'on-test-spec',              :git => 'git://github.com/Fingertips/on-test-spec.git'
   plugin 'peiji-san',                 :git => 'git://github.com/Fingertips/peiji-san.git'
   plugin 'risosu-san',                :git => 'git://github.com/Fingertips/risosu-san.git'
-  plugin 'validates_email-san'        :git => 'git://github.com/Fingertips/validates_email-san.git'
+  plugin 'validates_email-san',       :git => 'git://github.com/Fingertips/validates_email-san.git'
 end
 
 # Gems
