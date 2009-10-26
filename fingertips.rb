@@ -13,6 +13,14 @@ class Rails::TemplateRunner
     answer = ask(question).downcase
     answer == 'y' || answer == 'yes' || answer.empty?
   end
+  
+  TEMPLATE_HOME = ENV['TEST_TEMPLATE'] ? '../templates/' : 'http://github.com/Fingertips/rails-template/raw/master/templates/'
+  def template_file(template)
+    contents = open(TEMPLATE_HOME + template).read
+    contents.gsub!('{{app_name}}', name)
+    contents.gsub!('{{AppName}}', name.camelize)
+    file template, contents
+  end
 end
 
 def test_cache(dir)
@@ -27,11 +35,6 @@ def test_cache(dir)
       FileUtils.cp_r "vendor/#{dir}", "../vendor_cache"
     end
   end
-end
-
-TEMPLATE_HOME = ENV['TEST_TEMPLATE'] ? '../templates/' : 'http://github.com/Fingertips/rails-template/raw/master/templates/'
-def template_file(name)
-  file name, open(TEMPLATE_HOME + name).read
 end
 
 ####

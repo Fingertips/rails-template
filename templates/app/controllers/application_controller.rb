@@ -3,7 +3,7 @@ class ApplicationController < ActionController::Base
   protect_from_forgery
   filter_parameter_logging :password
   before_filter :find_authenticated, :block_access, :set_actionmailer_host
-  # report_errors_to 'http://forestwatcher.example.com/test_app', :username => 'forestwatcher', :password => 'secret'
+  # report_errors_to 'http://forestwatcher.example.com/{{app_name}}', :username => 'forestwatcher', :password => 'secret'
   
   protected
   

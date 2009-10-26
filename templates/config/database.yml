@@ -2,17 +2,17 @@ development:
   adapter: mysql
   encoding: utf8
   reconnect: false
-  database: test_app_development
+  database: {{app_name}}_development
   pool: 5
 test:
   adapter: mysql
   encoding: utf8
   reconnect: false
-  database: test_app_test
+  database: {{app_name}}_test
   pool: 5
 production:
   adapter: mysql
   encoding: utf8
   reconnect: false
-  database: test_app_production
+  database: {{app_name}}_production
   pool: 5
