@@ -146,8 +146,7 @@ end
 
 ActionMailer::Base.default_url_options[:host] = 'test.host'}
 
-inside 'test/ext' do
-  file 'test/ext/authentication.rb',
+file 'test/ext/authentication.rb',
 %{module TestHelpers
   module Authentication
     def login(member, password='secret')
@@ -172,8 +171,8 @@ inside 'test/ext' do
     end
   end
 end}
-  
-  file 'test/ext/file_fixtures.rb',
+
+file 'test/ext/file_fixtures.rb',
 %{module TestHelpers
   module FileFixtures
     def fixture_file_upload(path, mime_type = nil, binary = false)
@@ -182,8 +181,8 @@ end}
     end
   end
 end}
-  
-  file 'test/ext/time.rb',
+
+file 'test/ext/time.rb',
 %{module TestHelpers
   module Time
     def freeze_time!(time = ::Time.parse('6/1/2009'))
@@ -192,7 +191,6 @@ end}
     end
   end
 end}
-end
 
 # Lib
 
@@ -202,8 +200,7 @@ initializer 'core_ext.rb',
 ActiveRecord::Base.send(:extend, ActiveRecord::Ext)
 ActiveRecord::Base.send(:include, ActiveRecord::BasicScopes)}
 
-inside 'lib' do
-  file 'lib/active_record_ext.rb',
+file 'lib/active_record_ext.rb',
 %{module ActiveRecord
   module Ext
     # Loads various parts of a class definition, a simple way to separate large classes.
@@ -230,10 +227,8 @@ inside 'lib' do
     end
   end
 end}
-end
 
-inside 'test/lib' do
-  file 'test/lib/active_record_ext_test.rb',
+file 'test/lib/active_record_ext_test.rb',
 %{require File.expand_path('../../test_helper', __FILE__)
 
 describe "Model that includes ActiveRecord::Ext" do
@@ -247,7 +242,6 @@ describe "Model that includes ActiveRecord::Ext" do
     Member.limit(3).should.equal_set Member.all(:limit => 3)
   end
 end}
-end
 
 file 'lib/token.rb',
 %{module Token
@@ -282,8 +276,7 @@ end}
 # Concerns
 
 # TODO: This should probably move to a plugin.
-inside 'app/concerns' do
-  file 'app/concerns/nested_resource_methods.rb',
+file 'app/concerns/nested_resource_methods.rb',
 %{module Concerns
   module NestedResourceMethods
     def self.included(klass)
@@ -319,10 +312,8 @@ inside 'app/concerns' do
     end
   end
 end}
-end
 
-inside 'test/unit/concerns' do
-  file 'test/unit/concerns/nested_resource_methods_test.rb',
+file 'test/unit/concerns/nested_resource_methods_test.rb',
 %{require File.expand_path('../../../test_helper', __FILE__)
 
 class NestedResourceTestController
@@ -408,7 +399,6 @@ describe "NestedResourceMethods" do
     controller.instance_variable_get("@\#{name}")
   end
 end}
-end
 
 ####
 #
@@ -477,8 +467,7 @@ describe 'A', Member do
   end
 end}
 
-inside 'app/models/member' do
-  file 'app/models/member/authentication.rb',
+file 'app/models/member/authentication.rb',
 %{require 'digest/sha1'
 
 class Member
@@ -523,10 +512,8 @@ class Member
   
   validate :password_is_not_blank
 end}
-end
 
-inside 'test/unit/member' do
-  file 'test/unit/member/authentication_test.rb',
+file 'test/unit/member/authentication_test.rb',
 %{require File.expand_path('../../../test_helper', __FILE__)
 
 describe "Member, concerning authentication" do
@@ -600,7 +587,6 @@ describe "A member, concerning authentication" do
     @member.reload.hashed_password.should == Member.hash_password('new')
   end
 end}
-end
 
 file 'test/fixtures/members.yml',
 %{adrian:
