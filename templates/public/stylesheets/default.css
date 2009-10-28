@@ -1,1 +1,148 @@
-/* TODO: Need to add actualy default style rules. */
+/* @override 
+	http://booky.local/stylesheets/main.css?1256678976
+	http://booky.local/stylesheets/main.css?1256680235
+*/
+
+/* @group Typography */
+
+html,
+input
+{
+  font: 14px/20px "Lucida Grande", Lucida, "Lucida Sans Unicode", Verdana, sans-serif;
+}
+
+h1
+{
+  font-size: 200%;
+}
+h2
+{
+  font-size: 150%;
+  margin-bottom: 24px;
+}
+
+/* @end */
+
+/* @group Basics */
+
+a,
+a:visited
+{
+  color: #689051;
+}
+
+a:hover,
+a:active
+{
+  color: #84b567;
+}
+
+/* @end */
+
+/* @group Layout */
+
+a#logo
+{
+  display: block;
+  padding: 6px 12px;
+  color: #999;
+  text-decoration: none;
+}
+
+p#member
+{
+  position: absolute;
+  top: 3px;
+  right: 12px;
+}
+p#member a
+{
+  text-decoration: none;
+  font-size: 10px;
+}
+p#member a+a
+{
+  margin-left: 6px;
+}
+
+ul#navigation
+{
+  background-color: #bdff94;
+  padding: 6px 12px;
+  margin-bottom: 12px;
+  border-top: 1px solid #bfff97;
+  border-bottom: 1px solid #a0da7d;
+}
+ul#navigation li
+{
+  display: inline;
+}
+ul#navigation a,
+ul#navigation a:visited
+{
+  text-decoration: none;
+  color: #222;
+}
+ul#navigation a:hover,
+ul#navigation a:active
+{
+  color: #7d9b1d;
+}
+ul#navigation li + li
+{
+  margin-left:  6px;
+}
+
+div#main
+{
+  padding: 12px;
+}
+
+/* @end */
+
+/* @group Forms */
+
+div.field
+{
+  margin: 12px 0px;
+}
+label,
+div.label
+{
+  color: #666;
+}
+div.label a
+{
+  color: #999;
+  font-size: 80%;
+  text-decoration: none;
+}
+div.label a:hover
+{
+  text-decoration: underline;
+}
+div.inline label
+{
+  font-size: 90%;
+}
+
+input[type="text"],
+input[type="password"]
+{
+  color: #222;
+}
+
+a.cancel
+{
+  text-decoration: none;
+  color: #999;
+  font-size: 80%;
+  margin-left: 3px;
+}
+a.cancel:hover
+{
+  text-decoration: underline;
+}
+
+/* @end */
+
