@@ -1,6 +1,6 @@
 <div>
   <% form_tag new_session_path, :method => :get do %>
-    <h2><%= @title = 'Choose a new password' %></h2>
+    <h2><%=h @title = 'Choose a new password' %></h2>
     <p>Your password has been changed.</p>
     <div>
       <%= submit_tag 'Okay' %>
