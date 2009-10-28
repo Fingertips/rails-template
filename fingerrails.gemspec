@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{fingerrails}
-  s.version = "0.0.1"
+  s.version = "0.1.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Manfred Stienstra", "Eloy Duran"]
-  s.date = %q{2009-10-26}
+  s.date = %q{2009-10-28}
   s.default_executable = %q{fingerrails}
   s.description = %q{A self contained version of the Fingertips Rails template}
   s.email = %q{eloy@fngtps.com}
@@ -21,6 +21,9 @@ Gem::Specification.new do |s|
     ".gitignore",
      "README.rdoc",
      "Rakefile",
+     "VERSION",
+     "bin/fingerrails",
+     "fingerrails.gemspec",
      "fingertips.rb",
      "templates/.kick",
      "templates/Rakefile",
@@ -51,7 +54,8 @@ Gem::Specification.new do |s|
      "templates/lib/token.rb",
      "templates/public/403.html",
      "templates/public/javascripts/ready.js",
-     "templates/public/stylesheets/main.css",
+     "templates/public/stylesheets/default.css",
+     "templates/public/stylesheets/reset.css",
      "templates/test/ext/authentication.rb",
      "templates/test/ext/file_fixtures.rb",
      "templates/test/ext/time.rb",

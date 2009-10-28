@@ -151,6 +151,7 @@ run 'rm public/index.html'
 
 template_file 'public/403.html'
 template_file 'public/stylesheets/default.css'
+template_file 'public/stylesheets/reset.css'
 template_file 'public/javascripts/ready.js'
 
 template_file 'app/views/layouts/application.html.erb'
