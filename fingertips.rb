@@ -11,11 +11,6 @@ class Rails::TemplateRunner
     File.basename(root)
   end
   
-  def yes?(question)
-    answer = ask(question).downcase
-    answer == 'y' || answer == 'yes' || answer.empty?
-  end
-  
   def template_file(template)
     contents = open(File.join(TEMPLATE_HOME, template)).read
     contents.gsub!('{{app_name}}', name)
@@ -45,8 +40,7 @@ end
 
 # Setup
 
-template_file 'config/database.yml' if yes? 'Use MySQL instead of SQLite? [Y/n]'
-run_tests = yes?('Would you like to run the test suite once the app is created? [Y/n]')
+template_file 'config/database.yml'
 
 # Gems
 
@@ -183,4 +177,4 @@ template_file 'app/views/mailer/reset_password_message.erb'
 rake 'db:create:all'
 rake 'db:migrate'
 
-exec 'rake test' if run_tests
+exec 'rake test'
