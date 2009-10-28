@@ -6,18 +6,13 @@
   <% end %>
   
   <div class="field">
-    <span class="label"><%= f.label :email %></span>
-    <%= f.text_field :email, :tabindex => 1 %>
+    <div class="label"><%= f.label :email %></div>
+    <div class="field"><%= f.text_field :email, :tabindex => 1 %></div>
   </div>
   
   <div class="field">
-    <span class="label"><%= f.label :password %> <%= link_to 'forgot password?', new_password_path, :tabindex => 5 %></span>
-    <%= f.password_field :password, :tabindex => 2 %>
-  </div>
-  
-  <div class="field inline">
-    <%= check_box_tag :remember_me, 1, false, :tabindex => 3 %>
-    <%= label_tag :remember_me %>
+    <div class="label"><%= f.label :password %> <%= link_to 'forgot password?', new_password_path, :tabindex => 5 %></div>
+    <div class="field"><%= f.password_field :password, :tabindex => 2 %></div>
   </div>
   
   <div class="field">
