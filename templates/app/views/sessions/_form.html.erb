@@ -1,8 +1,8 @@
 <% form_for(@unauthenticated || Member.new, :url => session_path) do |f| %>
   <h2><%=h @title = 'Log in' %></h2>
   
-  <% if flash[:login_error] %>
-    <div class="errorExplanation"><%= flash[:login_error] %></div>
+  <% if @unauthenticated.errors.on(:base) %>
+    <div class="errorExplanation"><%= @unauthenticated.errors.on(:base) %></div>
   <% end %>
   
   <div class="field">

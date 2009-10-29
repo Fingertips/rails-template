@@ -34,11 +34,22 @@ describe "On the", SessionsController, "a visitor" do
     assert_select 'div.errorExplanation'
   end
   
+  it "should not default the wrong password in the form after a failed login" do
+    post :create, :member => valid_credentials.merge(:password => 'wrong')
+    assert_select 'input[id="member_password"]'
+    assert_select 'input[id="member_password"][value]', false
+  end
+  
   it "should see an explanation when the email does not exist" do
     post :create, :member => valid_credentials.merge(:email => 'unknown@example.com')
     should.not.be.authenticated
     status.should.be :success
     assert_select 'div.errorExplanation'
+  end
+  
+  it "should default the email in the form after a failed login" do
+    post :create, :member => valid_credentials.merge(:email => 'unknown@example.com')
+    assert_select 'input[id="member_email"][value="unknown@example.com"]'
   end
   
   it "should keep the url to return to if the password or email was wrong" do

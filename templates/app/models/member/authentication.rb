@@ -20,12 +20,13 @@ class Member
     ::Digest::SHA1.hexdigest(password)
   end
   
-  # Authenticates credentials. Takes a hash with a :email and :password, returns an instance of Member.
-  # The Member has errors on base when the user isn't authenticated.
+  # Authenticates credentials. Takes a hash with a :email and :password,
+  # returns an instance of Member. The Member has errors on base when
+  # the user isn't authenticated.
   def self.authenticate(params={})
     unless member = find_by_email_and_hashed_password(params[:email], hash_password(params[:password]))
-      member = Member.new
-      member.errors.add_to_base("The username and/or email you entered is invalid. Please try again.")
+      member = Member.new(params.slice(:email, :password))
+      member.errors.add_to_base("The credentials you entered are invalid. Please try again.")
       member
     else
       member
