@@ -4,13 +4,13 @@ Hey there! If you develop Rails applications just like us you might find this
 Ruby on Rails template useful. It pulls Rails 2.3 stable and the following
 gems:
 
-Authorization-San  –  Simple role-based authentication
-Authentication-Needed-San  –  Redirects unauthenticated users around
-Peiji-San  –  Pagination based on named scopes
-Risosu-San  –  Nested resource extensions for ActionController
-Validates Email-San  –  Email validation for ActiveRecord
-Generator-San  –  Lean Rails generator
-On-Test-Spec  –  test-spec extensions to make Rails testing easier
+* Authorization-San  –  Simple role-based authentication
+* Authentication-Needed-San  –  Redirects unauthenticated users around
+* Peiji-San  –  Pagination based on named scopes
+* Risosu-San  –  Nested resource extensions for ActionController
+* Validates Email-San  –  Email validation for ActiveRecord
+* Generator-San  –  Lean Rails generator
+* On-Test-Spec  –  test-spec extensions to make Rails testing easier
 
 You can use Fingerrails in two ways, as bleeding edge:
 
