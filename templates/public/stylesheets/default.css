@@ -23,13 +23,13 @@ h2
 a,
 a:visited
 {
-  color: #689051;
+  color: #366e26;
 }
 
 a:hover,
 a:active
 {
-  color: #84b567;
+  color: #cee27e;
 }
 
 /* @end */
@@ -40,8 +40,9 @@ a#logo
 {
   display: block;
   padding: 6px 12px;
-  color: #999;
+  color: #ddd;
   text-decoration: none;
+  font-size: 90%;
 }
 
 p#member
@@ -62,11 +63,11 @@ p#member a+a
 
 ul#navigation
 {
-  background-color: #bdff94;
+  background-color: #cee27e;
   padding: 6px 12px;
   margin-bottom: 12px;
-  border-top: 1px solid #bfff97;
-  border-bottom: 1px solid #a0da7d;
+  border-top: 1px solid #daef83;
+  border-bottom: 1px solid #b7c96e;
 }
 ul#navigation li
 {
@@ -81,7 +82,7 @@ ul#navigation a:visited
 ul#navigation a:hover,
 ul#navigation a:active
 {
-  color: #7d9b1d;
+  color: #637321;
 }
 ul#navigation li + li
 {
